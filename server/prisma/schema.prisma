@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String      @id @default(uuid())
+  name      String
+  email     String      @unique
+  password  String      
+  role      String      @default("USER") // "USER" or "ADMIN"
+  meetings  Meeting[]   @relation("HostMeetings")
+  files     FileShare[]
+  createdAt DateTime    @default(now())
+}
+
+model Meeting {
+  id        String      @id @default(uuid())
+  hostId    String
+  host      User        @relation("HostMeetings", fields: [hostId], references: [id])
+  startTime DateTime    @default(now())
+  endTime   DateTime?
+  files     FileShare[]
+}
+
+model FileShare {
+  id           String   @id @default(uuid())
+  filename     String
+  originalName String
+  path         String
+  accessKey    String   @unique
+  meetingId    String?
+  meeting      Meeting? @relation(fields: [meetingId], references: [id])
+  uploaderId   String
+  uploader     User     @relation(fields: [uploaderId], references: [id])
+  createdAt    DateTime @default(now())
+}

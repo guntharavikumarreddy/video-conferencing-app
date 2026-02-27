@@ -1,34 +1,56 @@
-// This Prisma schema file defines the data models for the video conferencing application.
+// schema.prisma
 
- datasource db {
-   provider = "sqlite"
-   url      = "file:./dev.db"
- }
- 
- generator client {
-   provider = "prisma-client-js"
- }
- 
- model User {
-   id        Int      @id @default(autoincrement())
-   name      String
-   email     String   @unique
-   meetings   Meeting[]
- }
- 
- model Meeting {
-   id        Int      @id @default(autoincrement())
-   title     String
-   description String?
-   dateTime  DateTime
-   participants User[] @relation("MeetingParticipants")
-   files     File[]
- }
- 
- model File {
-   id        Int      @id @default(autoincrement())
-   name      String
-   url       String
-   meeting   Meeting? @relation(fields: [meetingId], references: [id])
-   meetingId Int?
- }
+// This is your Prisma schema file.
+// Learn more about Prisma schema: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db" // update as per your SQLite db configuration
+}
+
+model User {
+  id      Int      @id @default(autoincrement())
+  name    String
+  email   String   @unique
+  meetings Meeting[]
+  files   File[]
+  chats   Chat[]
+}
+
+model Meeting {
+  id       Int      @id @default(autoincrement())
+  title    String
+  date     DateTime
+  agenda   String
+  users    User[]   @relation("UserMeetings")
+  chats    Chat[]
+}
+
+model File {
+  id        Int      @id @default(autoincrement())
+  filename  String
+  url       String
+  uploadedAt DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+  userId    Int?
+}
+
+model Chat {
+  id        Int      @id @default(autoincrement())
+  message   String
+  timestamp DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  meeting   Meeting   @relation(fields: [meetingId], references: [id])
+  meetingId Int
+}
+
+model Admin {
+  id    Int     @id @default(autoincrement())
+  name  String
+  email String  @unique
+}
